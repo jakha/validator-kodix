@@ -51,8 +51,7 @@ func (ks KodixSlice) IsValid() bool {
 }
 
 func (ka KodixArray) IsValid() bool {
-	l := len(ka)
-	return l == validLen()
+	return len(ka) == validLen()
 }
 
 func (ks KodixString) IsEmpty() bool {
