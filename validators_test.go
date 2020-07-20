@@ -8,76 +8,62 @@ import (
 func TestKodixString_Compliant(t *testing.T) {
 	var pattern = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
 	var stringText KodixString = "bb@mail.ru"
-	if !stringText.Compliant(pattern) {
+	err := stringText.Compliant(pattern)
+	if err != nil {
 		t.Error("Expected that text compliant to pattern")
 	}
 }
 
 func TestInIntArray(t *testing.T) {
-	var i1 = []int{1, 2}
-	var i2 = 1
-
-	if !InIntArray(i2, i1) {
+	if !InIntArray(1, []int{1, 2}) {
 		t.Error("Expected that i2 in i1 array")
 	}
 }
 
 func TestInStringArray(t *testing.T) {
-	var i1 = []string{"s", "we"}
-	var i2 = "we"
-
-	if !InStringArray(i2, i1) {
+	if !InStringArray("we", []string{"s", "we"}) {
 		t.Error("Expected that i2 in i1 array")
 	}
 }
 
 func TestKodixString_IsValid(t *testing.T) {
-	var valid KodixString = "1234567"
-	var notValid = KodixString("12")
-	checkValid(valid, notValid, t)
+	checkValid(KodixString("1234567"), KodixString("12"), t)
 }
 
 func TestKodixArray_IsValid(t *testing.T) {
 	var ka = KodixArray{1, 2, 3}
-	if !ka.IsValid() {
+	err := ka.IsValid()
+	if err != nil {
 		t.Error(errMsgCorrectValid(reflect.TypeOf(ka).String()))
 	}
 }
 
 func TestKodixIntMap_IsValid(t *testing.T) {
-	var notValid = KodixIntMap{1: 1, 2: 2}
-	var valid = KodixIntMap{1: 2, 2: 3, 3: 4, 4: 5, 5: 6, 6: 7, 7: 8}
-	checkValid(valid, notValid, t)
+	checkValid(KodixIntMap{1: 2, 2: 3, 3: 4, 4: 5, 5: 6, 6: 7, 7: 8}, KodixIntMap{1: 1, 2: 2}, t)
 }
 
 func TestKodixSlice_IsValid(t *testing.T) {
-	var notValid = KodixSlice{1, 2}
-	var valid = KodixSlice{1, 2, 3, 4, 5, 6, 7}
-	checkValid(valid, notValid, t)
+	checkValid(KodixSlice{1, 2, 3, 4, 5, 6, 7}, KodixSlice{1, 2}, t)
 }
 
 func TestKodixArray_IsEmpty(t *testing.T) {
 	var empty KodixArray
-	notEmpty := KodixArray{1}
-	checkEmpty(empty, notEmpty, t)
+	checkEmpty(empty, KodixArray{1}, t)
 }
 
 func TestKodixIntMap_IsEmpty(t *testing.T) {
 	var empty KodixIntMap
-	var notEmpty = KodixIntMap{1: 2}
-	checkEmpty(empty, notEmpty, t)
+	checkEmpty(empty, KodixIntMap{1: 2}, t)
 }
 
 func TestKodixSlice_IsEmpty(t *testing.T) {
 	var empty KodixSlice
-	var notEmpty = KodixSlice{1, 2}
-	checkEmpty(empty, notEmpty, t)
+	checkEmpty(empty, KodixSlice{1, 2}, t)
 }
 
 func TestKodixString_IsEmpty(t *testing.T) {
 	var empty KodixString
-	var notEmpty = KodixString("1")
-	checkEmpty(empty, notEmpty, t)
+	checkEmpty(empty, KodixString("1"), t)
 }
 
 func errMsgForEmpty(typeName string) string {
@@ -89,11 +75,11 @@ func errMsgForNotEmpty(typeName string) string {
 }
 
 func errMsgIncorrectValid(typeName string) string {
-	return "Not valid data by type: " + typeName + ", expected valid data."
+	return "Not valid data by type: " + typeName + ", but method define as valid data."
 }
 
 func errMsgCorrectValid(typeName string) string {
-	return "Valid data by type: " + typeName + ", expected not valid data."
+	return "Valid data by type: " + typeName + ", but method define as not valid data."
 }
 
 func checkEmpty(empty EmptyChecker, notEmpty EmptyChecker, t *testing.T) {
@@ -107,11 +93,13 @@ func checkEmpty(empty EmptyChecker, notEmpty EmptyChecker, t *testing.T) {
 }
 
 func checkValid(valid Validator, notValid Validator, t *testing.T) {
-	if !valid.IsValid() {
-		t.Error(errMsgIncorrectValid(reflect.TypeOf(valid).String()))
+	err := valid.IsValid()
+	if err != nil {
+		t.Error(errMsgCorrectValid(reflect.TypeOf(valid).String()))
 	}
 
-	if notValid.IsValid() {
-		t.Error(errMsgCorrectValid(reflect.TypeOf(notValid).String()))
+	err = notValid.IsValid()
+	if err == nil {
+		t.Error(errMsgIncorrectValid(reflect.TypeOf(notValid).String()))
 	}
 }
